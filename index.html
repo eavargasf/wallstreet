@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Investment Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .widget {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .stock-list, .strategy-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .stock-item, .strategy-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .positive {
+            color: green;
+        }
+        .negative {
+            color: red;
+        }
+        #stockChart {
+            width: 100%;
+            height: 300px;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .strategy-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="widget">
+            <h2>Market Overview</h2>
+            <div id="marketOverview"></div>
+        </div>
+        <div class="widget">
+            <h2>Top Stocks</h2>
+            <ul class="stock-list" id="topStocks"></ul>
+        </div>
+        <div class="widget">
+            <h2>Economic Indicators</h2>
+            <div id="economicIndicators"></div>
+        </div>
+        <div class="widget" style="grid-column: span 3;">
+            <h2>Stock Performance</h2>
+            <canvas id="stockChart"></canvas>
+        </div>
+        <div class="widget">
+            <h2>News Feed</h2>
+            <div id="newsFeed"></div>
+        </div>
+        <div class="widget">
+            <h2>Portfolio Performance</h2>
+            <div id="portfolioPerformance"></div>
+        </div>
+        <div class="widget">
+            <h2>Trading Actions</h2>
+            <div id="tradingActions"></div>
+        </div>
+        <div class="widget" style="grid-column: span 2;">
+            <h2>Investment Strategies</h2>
+            <ul class="strategy-list" id="investmentStrategies"></ul>
+        </div>
+        <div class="widget">
+            <h2>Potential Growth Stocks</h2>
+            <ul class="stock-list" id="growthStocks"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Existing mock data (unchanged)
+        const marketOverview = {
+            "S&P 500": 4185.47,
+            "Dow Jones": 33875.40,
+            "NASDAQ": 12153.41
+        };
+
+        const topStocks = [
+            { name: "AAPL", price: 134.32, change: 2.54 },
+            { name: "GOOGL", price: 2299.92, change: -15.01 },
+            { name: "AMZN", price: 3372.20, change: 32.98 },
+            { name: "MSFT", price: 257.17, change: 0.95 },
+            { name: "FB", price: 329.51, change: -3.64 }
+        ];
+
+        const economicIndicators = {
+            "Inflation Rate": "2.6%",
+            "Unemployment Rate": "6.1%",
+            "GDP Growth Rate": "6.4%"
+        };
+
+        const news = [
+            "Federal Reserve keeps interest rates near zero",
+            "Tech stocks surge as earnings beat expectations",
+            "Oil prices rise amid increasing demand"
+        ];
+
+        // New mock data for investment strategies and growth stocks
+        const investmentStrategies = [
+            { name: "Value Investing", description: "Focus on undervalued stocks with strong fundamentals" },
+            { name: "Growth Investing", description: "Target companies with high potential for future growth" },
+            { name: "Dividend Investing", description: "Invest in stocks that provide regular dividend payments" },
+            { name: "Index Investing", description: "Passive strategy tracking market indices for long-term growth" }
+        ];
+
+        const growthStocks = [
+            { name: "NVDA", price: 645.49, potential: "High growth in AI and gaming sectors" },
+            { name: "PLTR", price: 23.04, potential: "Expanding government and commercial contracts" },
+            { name: "SQ", price: 246.33, potential: "Fintech leader with strong revenue growth" },
+            { name: "TSLA", price: 709.44, potential: "Electric vehicle market dominance and energy solutions" }
+        ];
+
+        // Existing dashboard population (unchanged)
+        document.getElementById("marketOverview").innerHTML = Object.entries(marketOverview)
+            .map(([index, value]) => `<p>${index}: ${value}</p>`)
+            .join("");
+
+        document.getElementById("topStocks").innerHTML = topStocks
+            .map(stock => `
+                <li class="stock-item" onclick="updateChart('${stock.name}')">
+                    <span>${stock.name}</span>
+                    <span>${stock.price}</span>
+                    <span class="${stock.change > 0 ? 'positive' : 'negative'}">
+                        ${stock.change > 0 ? '+' : ''}${stock.change}
+                    </span>
+                </li>
+            `)
+            .join("");
+
+        document.getElementById("economicIndicators").innerHTML = Object.entries(economicIndicators)
+            .map(([indicator, value]) => `<p>${indicator}: ${value}</p>`)
+            .join("");
+
+        document.getElementById("newsFeed").innerHTML = news
+            .map(item => `<p>${item}</p>`)
+            .join("");
+
+        document.getElementById("portfolioPerformance").innerHTML = "<p>Total Value: $157,492.36</p><p>Daily Change: +$3,216.85 (+2.08%)</p>";
+
+        document.getElementById("tradingActions").innerHTML = `
+            <button class="button" onclick="simulateTrade('buy')">Buy</button>
+            <button class="button" style="background-color: #f44336;" onclick="simulateTrade('sell')">Sell</button>
+        `;
+
+        // New sections for investment strategies and growth stocks
+        document.getElementById("investmentStrategies").innerHTML = investmentStrategies
+            .map(strategy => `
+                <li class="strategy-item">
+                    <span>${strategy.name}</span>
+                    <p class="strategy-description">${strategy.description}</p>
+                </li>
+            `)
+            .join("");
+
+        document.getElementById("growthStocks").innerHTML = growthStocks
+            .map(stock => `
+                <li class="stock-item" onclick="updateChart('${stock.name}')">
+                    <span>${stock.name}</span>
+                    <span>${stock.price}</span>
+                    <p class="strategy-description">${stock.potential}</p>
+                </li>
+            `)
+            .join("");
+
+        // Existing chart initialization and functions (unchanged)
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        let stockChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Stock Price',
+                    data: [],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        function updateChart(stockName) {
+            const mockData = Array.from({length: 30}, () => Math.floor(Math.random() * 100) + 100);
+            const labels = Array.from({length: 30}, (_, i) => `Day ${i+1}`);
+            
+            stockChart.data.labels = labels;
+            stockChart.data.datasets[0].data = mockData;
+            stockChart.data.datasets[0].label = `${stockName} Stock Price`;
+            stockChart.update();
+        }
+
+        function simulateTrade(action) {
+            const result = action === 'buy' ? 'purchased' : 'sold';
+            alert(`Successfully ${result} stock! (This is a simulation)`);
+        }
+
+        // Initialize with first stock
+        updateChart(topStocks[0].name);
+    </script>
+</body>
+</html>
