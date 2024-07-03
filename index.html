@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Investment Dashboard</title>
+    <title>Dynamic Investment Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
         body {
@@ -109,14 +109,14 @@
     </div>
 
     <script>
-        // Existing mock data (unchanged)
-        const marketOverview = {
+        // Initial data
+        let marketOverview = {
             "S&P 500": 4185.47,
             "Dow Jones": 33875.40,
             "NASDAQ": 12153.41
         };
 
-        const topStocks = [
+        let topStocks = [
             { name: "AAPL", price: 134.32, change: 2.54 },
             { name: "GOOGL", price: 2299.92, change: -15.01 },
             { name: "AMZN", price: 3372.20, change: 32.98 },
@@ -130,13 +130,12 @@
             "GDP Growth Rate": "6.4%"
         };
 
-        const news = [
+        let news = [
             "Federal Reserve keeps interest rates near zero",
             "Tech stocks surge as earnings beat expectations",
             "Oil prices rise amid increasing demand"
         ];
 
-        // New mock data for investment strategies and growth stocks
         const investmentStrategies = [
             { name: "Value Investing", description: "Focus on undervalued stocks with strong fundamentals" },
             { name: "Growth Investing", description: "Target companies with high potential for future growth" },
@@ -151,59 +150,63 @@
             { name: "TSLA", price: 709.44, potential: "Electric vehicle market dominance and energy solutions" }
         ];
 
-        // Existing dashboard population (unchanged)
-        document.getElementById("marketOverview").innerHTML = Object.entries(marketOverview)
-            .map(([index, value]) => `<p>${index}: ${value}</p>`)
-            .join("");
+        // Function to update the dashboard
+        function updateDashboard() {
+            // Update Market Overview
+            Object.keys(marketOverview).forEach(index => {
+                marketOverview[index] += (Math.random() - 0.5) * 10;
+                marketOverview[index] = parseFloat(marketOverview[index].toFixed(2));
+            });
 
-        document.getElementById("topStocks").innerHTML = topStocks
-            .map(stock => `
-                <li class="stock-item" onclick="updateChart('${stock.name}')">
-                    <span>${stock.name}</span>
-                    <span>${stock.price}</span>
-                    <span class="${stock.change > 0 ? 'positive' : 'negative'}">
-                        ${stock.change > 0 ? '+' : ''}${stock.change}
-                    </span>
-                </li>
-            `)
-            .join("");
+            document.getElementById("marketOverview").innerHTML = Object.entries(marketOverview)
+                .map(([index, value]) => `<p>${index}: ${value}</p>`)
+                .join("");
 
-        document.getElementById("economicIndicators").innerHTML = Object.entries(economicIndicators)
-            .map(([indicator, value]) => `<p>${indicator}: ${value}</p>`)
-            .join("");
+            // Update Top Stocks
+            topStocks.forEach(stock => {
+                stock.price += (Math.random() - 0.5) * 5;
+                stock.price = parseFloat(stock.price.toFixed(2));
+                stock.change = parseFloat((Math.random() - 0.5) * 10).toFixed(2);
+            });
 
-        document.getElementById("newsFeed").innerHTML = news
-            .map(item => `<p>${item}</p>`)
-            .join("");
+            document.getElementById("topStocks").innerHTML = topStocks
+                .map(stock => `
+                    <li class="stock-item" onclick="updateChart('${stock.name}')">
+                        <span>${stock.name}</span>
+                        <span>${stock.price}</span>
+                        <span class="${stock.change > 0 ? 'positive' : 'negative'}">
+                            ${stock.change > 0 ? '+' : ''}${stock.change}
+                        </span>
+                    </li>
+                `)
+                .join("");
 
-        document.getElementById("portfolioPerformance").innerHTML = "<p>Total Value: $157,492.36</p><p>Daily Change: +$3,216.85 (+2.08%)</p>";
+            // Update News Feed (simulating new news every minute)
+            if (Math.random() > 0.8) {
+                const newHeadlines = [
+                    "New tech startup raises $50M in Series A funding",
+                    "Global chip shortage continues to affect electronics industry",
+                    "Renewable energy stocks soar on new government initiatives",
+                    "Cryptocurrency market experiences high volatility",
+                    "Major retailer announces expansion plans, stock jumps 5%"
+                ];
+                news.unshift(newHeadlines[Math.floor(Math.random() * newHeadlines.length)]);
+                if (news.length > 5) news.pop();
+            }
 
-        document.getElementById("tradingActions").innerHTML = `
-            <button class="button" onclick="simulateTrade('buy')">Buy</button>
-            <button class="button" style="background-color: #f44336;" onclick="simulateTrade('sell')">Sell</button>
-        `;
+            document.getElementById("newsFeed").innerHTML = news
+                .map(item => `<p>${item}</p>`)
+                .join("");
 
-        // New sections for investment strategies and growth stocks
-        document.getElementById("investmentStrategies").innerHTML = investmentStrategies
-            .map(strategy => `
-                <li class="strategy-item">
-                    <span>${strategy.name}</span>
-                    <p class="strategy-description">${strategy.description}</p>
-                </li>
-            `)
-            .join("");
+            // Update chart if a stock is selected
+            if (currentStock) {
+                updateChart(currentStock);
+            }
+        }
 
-        document.getElementById("growthStocks").innerHTML = growthStocks
-            .map(stock => `
-                <li class="stock-item" onclick="updateChart('${stock.name}')">
-                    <span>${stock.name}</span>
-                    <span>${stock.price}</span>
-                    <p class="strategy-description">${stock.potential}</p>
-                </li>
-            `)
-            .join("");
+        // Other existing functions
+        let currentStock = null;
 
-        // Existing chart initialization and functions (unchanged)
         const ctx = document.getElementById('stockChart').getContext('2d');
         let stockChart = new Chart(ctx, {
             type: 'line',
@@ -227,6 +230,7 @@
         });
 
         function updateChart(stockName) {
+            currentStock = stockName;
             const mockData = Array.from({length: 30}, () => Math.floor(Math.random() * 100) + 100);
             const labels = Array.from({length: 30}, (_, i) => `Day ${i+1}`);
             
@@ -240,6 +244,41 @@
             const result = action === 'buy' ? 'purchased' : 'sold';
             alert(`Successfully ${result} stock! (This is a simulation)`);
         }
+
+        // Initial population of static elements
+        document.getElementById("economicIndicators").innerHTML = Object.entries(economicIndicators)
+            .map(([indicator, value]) => `<p>${indicator}: ${value}</p>`)
+            .join("");
+
+        document.getElementById("portfolioPerformance").innerHTML = "<p>Total Value: $157,492.36</p><p>Daily Change: +$3,216.85 (+2.08%)</p>";
+
+        document.getElementById("tradingActions").innerHTML = `
+            <button class="button" onclick="simulateTrade('buy')">Buy</button>
+            <button class="button" style="background-color: #f44336;" onclick="simulateTrade('sell')">Sell</button>
+        `;
+
+        document.getElementById("investmentStrategies").innerHTML = investmentStrategies
+            .map(strategy => `
+                <li class="strategy-item">
+                    <span>${strategy.name}</span>
+                    <p class="strategy-description">${strategy.description}</p>
+                </li>
+            `)
+            .join("");
+
+        document.getElementById("growthStocks").innerHTML = growthStocks
+            .map(stock => `
+                <li class="stock-item" onclick="updateChart('${stock.name}')">
+                    <span>${stock.name}</span>
+                    <span>${stock.price}</span>
+                    <p class="strategy-description">${stock.potential}</p>
+                </li>
+            `)
+            .join("");
+
+        // Start the automatic updates
+        updateDashboard(); // Initial update
+        setInterval(updateDashboard, 5000); // Update every 5 seconds
 
         // Initialize with first stock
         updateChart(topStocks[0].name);
